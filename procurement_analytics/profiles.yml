@@ -1,0 +1,8 @@
+procurement_analytics:
+  outputs:
+    dev:
+      type: duckdb
+      path: "md:procurement"
+      threads: 1
+
+  target: dev

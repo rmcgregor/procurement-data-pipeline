@@ -27,3 +27,6 @@ procurement_analytics/dbt_packages/
 # Temporary/test files
 t.txt
 test.py
+
+# dbt user-specific metadata
+.user.yml

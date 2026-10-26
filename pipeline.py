@@ -8,7 +8,7 @@ def run_dbt():
     print("\n2. Running dbt models...")
 
     subprocess.run(
-        ["dbt", "run"],
+        ["dbt", "run", "--profiles-dir", "."],
         cwd="procurement_analytics",
         check=True
     )
@@ -18,7 +18,7 @@ def test_dbt():
     print("\n3. Running dbt tests...")
 
     subprocess.run(
-        ["dbt", "test"],
+        ["dbt", "test", "--profiles-dir", "."],
         cwd="procurement_analytics",
         check=True
     )
