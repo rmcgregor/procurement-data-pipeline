@@ -1,0 +1,29 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local DuckDB databases
+*.duckdb
+*.duckdb.wal
+
+# Logs
+logs/
+
+# dbt generated files
+procurement_analytics/target/
+procurement_analytics/logs/
+procurement_analytics/dbt_packages/
+
+# Environment / secret files
+.env
+.env.*
+
+# Temporary/test files
+t.txt
+test.py

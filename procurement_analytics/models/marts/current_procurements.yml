@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: current_procurements
+    description: "One row per procurement process representing its latest release"
+    columns:
+      - name: ocid
+        description: "Unique identifier for a procurement"
+        data_tests:
+          - not_null
+          - unique
+      - name: release_id
+        description: "Identifier of the latest release for the procurement process"
+        data_tests:
+          - not_null
+  - name: current_awards
+    description: "Awards present in the latest release of each procurement process"
+    columns:
+    - name: ocid
+      description: "Unique identifier for the procurement process"
+      data_tests:
+        - not_null
+
+    - name: award_id
+      description: "Identifier of the award within the procurement process"
+      data_tests:
+        - not_null
+  - name: dim_suppliers
+    description: "One row per supplier using the latest known supplier name"
+    columns:
+    - name: supplier_key
+      description: "Unique supplier key, using supplier ID where available and supplier name where the source ID is unreliable"
+      data_tests:
+        - not_null
+        - unique
+
+    - name: supplier_name
+      description: "Latest known name for the supplier"
+      data_tests:
+        - not_null
+  - name: award_suppliers
+    description: "Bridge between current awards and their suppliers"
+    columns:
+    - name: ocid
+      description: "Identifier for the procurement process"
+      data_tests:
+        - not_null
+
+    - name: award_id
+      description: "Identifier for the award"
+      data_tests:
+        - not_null
+
+    - name: supplier_key
+      description: "Key identifying the supplier"
+      data_tests:
+        - not_null
+        - relationships:
+            arguments:
+              to: ref('dim_suppliers')
+              field: supplier_key

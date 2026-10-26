@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_releases
+    description: "Cleaned and structured procurement release data"
+    columns:
+      - name: release_id
+        description: "Unique identifier for an individual OCDS release"
+        data_tests:
+          - not_null
+          - unique
+      - name: ocid
+        description: "Identifier for the overall procurement process"
+        data_tests:
+          - not_null
+
+  - name: stg_awards
+    description: "One row per award per procurement release"
+    columns:
+      - name: release_id
+        description: "Identifier of the OCDS release containing the award"
+        data_tests:
+          - not_null
+
+      - name: award_id
+        description: "Identifier of the award within the procurement release"
+        data_tests:
+          - not_null
+
+  - name: stg_award_suppliers
+    description: "One row per supplier per award per procurement release"
+    columns:
+      - name: release_id
+        description: "Identifier of the OCDS release containing the award"
+        data_tests:
+          - not_null
+
+      - name: award_id
+        description: "Identifier of the award containing the supplier"
+        data_tests:
+          - not_null
+
+      - name: supplier_id
+        description: "Identifier of the supplier associated with the award"
+        data_tests:
+          - not_null
