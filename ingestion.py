@@ -4,6 +4,7 @@ import json
 import uuid
 import time
 from datetime import datetime, timedelta
+from prefect import get_run_logger
 
 ## Refactoring the pipeline
 def get_watermark():
@@ -180,11 +181,12 @@ def complete_pipeline_run(
 
 def run_pipeline():
 
+    logger = get_run_logger()
     watermark = get_watermark()
-    print("Watermark from:", watermark)
+    logger.info("Watermark from: %s", watermark)
 
     run_id = start_pipeline_run(watermark)
-    print("Run ID:", run_id)
+    logger.info("Pipeline run ID: %s", run_id)
 
     try:
         # Start processing from the last successful watermark
@@ -206,9 +208,10 @@ def run_pipeline():
                 current_time
             )
 
-            print(
-                f"\nExtracting window: "
-                f"{watermark_from} to {watermark_to}"
+            logger.info(
+                "Extracting window: %s to %s",
+                watermark_from,
+                watermark_to
             )
 
             releases = extract_releases(
@@ -222,10 +225,10 @@ def run_pipeline():
             total_inserted += inserted
             total_skipped += skipped
 
-            print("Extracted:", len(releases))
-            print("Processed:", processed)
-            print("Inserted:", inserted)
-            print("Skipped:", skipped)
+            logger.info("Extracted: %s", len(releases))
+            logger.info("Processed: %s", processed)
+            logger.info("Inserted: %s", inserted)
+            logger.info("Skipped: %s", skipped)
 
             # Only move forward after this window has loaded successfully
             watermark_from = watermark_to
@@ -239,15 +242,15 @@ def run_pipeline():
             total_skipped
         )
 
-        print("\nPipeline completed successfully")
-        print("Total extracted:", total_extracted)
-        print("Total inserted:", total_inserted)
-        print("Total skipped:", total_skipped)
-        print("Watermark to:", watermark_from)
+        logger.info("Pipeline completed successfully")
+        logger.info("Total extracted: %s", total_extracted)
+        logger.info("Total inserted: %s", total_inserted)
+        logger.info("Total skipped: %s", total_skipped)
+        logger.info("Watermark to: %s", watermark_from)
 
     except Exception:
         fail_pipeline_run(run_id)
-        print("Pipeline failed!")
+        logger.exception("Pipeline failed")
         raise
 
 if __name__ == "__main__":
