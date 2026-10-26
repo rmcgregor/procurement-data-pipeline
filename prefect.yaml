@@ -43,4 +43,7 @@ deployments:
         - "requests"
       env:
         MOTHERDUCK_TOKEN: "{{ prefect.blocks.secret.motherduck-token.value }}"
-  schedules: null
+  schedules:
+    - cron: "0 6 * * *"
+      timezone: "Europe/London"
+      active: true
