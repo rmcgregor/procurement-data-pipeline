@@ -59,3 +59,24 @@ models:
             arguments:
               to: ref('dim_suppliers')
               field: supplier_key
+  - name: dim_buyers
+    description: "One row per buyer using the latest known buyer details"
+    columns:
+    - name: buyer_id
+      description: "Unique identifier for the buyer organisation"
+      data_tests:
+        - not_null
+        - unique
+
+  - name: procurement_buyers
+    description: "Bridge between procurement processes and buyer organisations"
+    columns:
+    - name: ocid
+      description: "Identifier for the procurement process"
+      data_tests:
+        - not_null
+
+    - name: buyer_id
+      description: "Identifier for the buyer organisation"
+      data_tests:
+        - not_null
