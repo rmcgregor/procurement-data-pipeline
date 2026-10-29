@@ -1,5 +1,6 @@
 import subprocess
 import ingestion
+import observability
 from prefect import flow, task
 
 
@@ -37,16 +38,46 @@ def build_dbt_models():
 def run_dbt_tests():
     test_dbt()
 
-@flow(name="Procurement Pipeline")
+@task
+def send_pipeline_report():
+    report = observability.generate_report()
+
+    observability.send_report(
+        report,
+        "rory.mcgregor@gmail.com"
+    )
+
+def notify_failure(flow, flow_run, state):
+    print("\n*** PREFECT FAILURE HOOK CALLED ***")
+    error = state.message or "Unknown pipeline error"
+
+    report = observability.generate_failure_report(
+        RuntimeError(error)
+    )
+
+    try:
+        observability.send_report(
+            report,
+            "rory.mcgregor@gmail.com"
+        )
+        print("*** FAILURE EMAIL SENT ***")
+    except Exception as email_error:
+        print(f"*** FAILURE EMAIL ERROR: {email_error} ***")
+        print(f"Failed to send failure notification: {email_error}")
+
+@flow(
+    name="Procurement Pipeline",
+    on_failure=[notify_failure]
+)
 def run():
 
     print("Starting procurement pipeline")
 
     ingest_data()
-
     build_dbt_models()
-
     run_dbt_tests()
+
+    send_pipeline_report()
 
     print("\nProcurement pipeline completed successfully")
 
