@@ -5,6 +5,7 @@ WITH ranked_buyers AS (
         buyer_name,
         locality,
         postcode,
+        postcode_key,
         region,
         country,
         release_date,
@@ -23,6 +24,7 @@ SELECT
     buyer_name,
     locality,
     postcode,
+    postcode_key,
     region,
     country,
     release_date AS latest_release_date

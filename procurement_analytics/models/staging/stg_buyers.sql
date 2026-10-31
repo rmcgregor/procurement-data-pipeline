@@ -6,6 +6,14 @@ SELECT
     p.value ->> 'name' AS buyer_name,
     p.value -> 'address' ->> 'locality' AS locality,
     p.value -> 'address' ->> 'postalCode' AS postcode,
+    UPPER(
+        REGEXP_REPLACE(
+            TRIM(p.value -> 'address' ->> 'postalCode'),
+            '[^A-Za-z0-9]',
+            '',
+            'g'
+        )
+    ) AS postcode_key,
     p.value -> 'address' ->> 'region' AS region,
     p.value -> 'address' ->> 'country' AS country
 FROM {{ source('procurement', 'raw_releases') }} r,
