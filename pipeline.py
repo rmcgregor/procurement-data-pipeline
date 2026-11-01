@@ -1,12 +1,30 @@
 import subprocess
 import ingestion
+import geography
 import observability
 from prefect import flow, task
 
+def run_buyer_dbt():
+
+    print("\n2. Building buyer models...")
+
+    subprocess.run(
+        [
+            "dbt",
+            "run",
+            "--select",
+            "stg_buyers",
+            "dim_buyers",
+            "--profiles-dir",
+            "."
+        ],
+        cwd="procurement_analytics",
+        check=True
+    )
 
 def run_dbt():
 
-    print("\n2. Running dbt models...")
+    print("\n4. Running dbt models...")
 
     subprocess.run(
         ["dbt", "run", "--profiles-dir", "."],
@@ -16,7 +34,7 @@ def run_dbt():
 
 def test_dbt():
 
-    print("\n3. Running dbt tests...")
+    print("\n5. Running dbt tests...")
 
     subprocess.run(
         ["dbt", "test", "--profiles-dir", "."],
@@ -28,6 +46,14 @@ def test_dbt():
 def ingest_data():
     ingestion.run_pipeline()
 
+@task
+def build_buyer_models():
+    run_buyer_dbt()
+
+@task(retries=2, retry_delay_seconds=60)
+def refresh_geography():
+    print("\n3. Refreshing geography...")
+    geography.run_geography()
 
 @task
 def build_dbt_models():
@@ -74,9 +100,10 @@ def run():
     print("Starting procurement pipeline")
 
     ingest_data()
+    build_buyer_models()
+    refresh_geography()
     build_dbt_models()
     run_dbt_tests()
-
     send_pipeline_report()
 
     print("\nProcurement pipeline completed successfully")

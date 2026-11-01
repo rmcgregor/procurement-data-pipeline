@@ -80,3 +80,11 @@ models:
       description: "Identifier for the buyer organisation"
       data_tests:
         - not_null
+  - name: dim_geography
+    description: "One row per valid buyer postcode with ONS geographic classifications"
+    columns:
+      - name: postcode_key
+        description: "Normalised postcode used to link buyers to geography"
+        data_tests:
+          - not_null
+          - unique
