@@ -41,6 +41,7 @@ deployments:
         - "dbt-core==1.12.5"
         - "dbt-duckdb==1.11.0"
         - "requests"
+        - "pandas"
         - "resend==2.50.0"
       env:
         MOTHERDUCK_TOKEN: "{{ prefect.blocks.secret.motherduck-token.value }}"
