@@ -88,3 +88,17 @@ models:
         data_tests:
           - not_null
           - unique
+  - name: dim_date
+    description: "Calendar date dimension for time-based analysis and reporting"
+    columns:
+      - name: date
+        description: "Calendar date"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: date_key
+        description: "Integer date key in YYYYMMDD format"
+        data_tests:
+          - not_null
+          - unique
