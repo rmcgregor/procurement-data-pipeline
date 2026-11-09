@@ -102,3 +102,59 @@ models:
         data_tests:
           - not_null
           - unique
+  - name: dim_cpv_categories
+    description: "One row per unique CPV procurement classification"
+    columns:
+      - name: cpv_code
+        description: "Common Procurement Vocabulary classification code"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: cpv_description
+        description: "Description of the CPV classification"
+  - name: procurement_categories
+    description: "Bridge linking procurements to their CPV classifications"
+    columns:
+      - name: ocid
+        description: "Procurement process identifier"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_procurement_overview')
+                field: ocid
+
+      - name: cpv_code
+        description: "CPV classification code"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_cpv_categories')
+                field: cpv_code
+  - name: dim_cpv_divisions
+    columns:
+      - name: cpv_division_code
+        data_tests:
+          - not_null
+          - unique
+  - name: gold_procurement_overview
+    description: "One row per procurement process with latest details and framework classification"
+    columns:
+      - name: ocid
+        description: "Unique procurement process identifier"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: framework_status
+        description: "Framework classification derived from OCDS release history"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Framework
+                  - Not framework
+                  - Unknown
