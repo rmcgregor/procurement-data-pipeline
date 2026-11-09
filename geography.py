@@ -2,6 +2,8 @@
 import requests
 import duckdb
 import pandas as pd
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 ONS_API_URL = "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/ONS_Postcode_Directory_%28August_2026%29_%28Hosted_Table%29/FeatureServer/0/query"
 
@@ -29,9 +31,28 @@ def load_buyer_geography(buyer_postcodes):
     all_rows = []
     batch_size = 100
 
+
+    session = requests.Session()
+
+    retry_strategy = Retry(
+        total=3,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET"]
+    )
+
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
     for i in range(0, len(formatted_postcodes), batch_size):
         batch = formatted_postcodes[i:i + batch_size]
+        batch_number = i // batch_size + 1
+        total_batches = (len(formatted_postcodes) + batch_size - 1) // batch_size
 
+        print(
+            f"Fetching postcode batch {batch_number}/{total_batches} "
+            f"({len(batch)} postcodes)",
+            flush=True
+        )
         postcode_list = ", ".join(
             f"'{postcode}'"
             for postcode in batch
@@ -44,14 +65,29 @@ def load_buyer_geography(buyer_postcodes):
             "f": "json"
         }
 
-        response = requests.get(
+        response = session.get(
             ONS_API_URL,
             params=params,
-            timeout=30
+            timeout=(10, 90)
         )
         response.raise_for_status()
 
         data = response.json()
+
+        if "error" in data:
+            raise RuntimeError(
+                f"ArcGIS returned an error: {data['error']}"
+            )
+
+        if "features" not in data:
+            raise RuntimeError(
+                "ArcGIS response did not contain a features array"
+            )
+
+        if data.get("exceededTransferLimit"):
+            raise RuntimeError(
+                "ArcGIS response exceeded the transfer limit"
+            )
 
         rows = [
             feature["attributes"]
@@ -59,6 +95,11 @@ def load_buyer_geography(buyer_postcodes):
         ]
 
         all_rows.extend(rows)
+        print(
+            f"Batch {batch_number}/{total_batches} completed: "
+            f"{len(rows)} postcodes returned",
+            flush=True
+        )
 
     geography = pd.DataFrame(all_rows)
 
